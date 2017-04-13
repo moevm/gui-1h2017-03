@@ -24,10 +24,25 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp\
-    widget.cpp
+    widget.cpp \
+    player.cpp \
+    egg.cpp \
+    ground.cpp \
+    trap.cpp \
+    ladder.cpp
 
 HEADERS  += \
-    widget.h
+    widget.h \
+    player.h \
+    egg.h \
+    ground.h \
+    trap.h \
+    ladder.h
 
 FORMS    += \
     widget.ui
+
+DISTFILES +=
+
+RESOURCES += \
+    src.qrc
