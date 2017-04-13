@@ -7,6 +7,7 @@
 #include <QGraphicsItem>
 #include <QTimer>
 #include <QLCDNumber>
+#include <QMessageBox>
 
 #include <windows.h>
 
@@ -33,6 +34,7 @@ private:
     Player* player;
     QGraphicsScene *scene;
     QTimer *timer;
+    QTimer *eggTimer;
     Ui::Widget *ui;
 
     void paintEvent(QPaintEvent *);
@@ -49,6 +51,8 @@ private slots:
     void on_quitButton_clicked();
 
     void eggDelete(QGraphicsItem *item);
+    void createEgg();
+    void gameOverMsg();
 };
 
 #endif // WIDGET_H

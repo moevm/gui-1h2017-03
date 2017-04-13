@@ -24,26 +24,10 @@ Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget)
     player = new Player();
     scene->addItem(player);
 
-    Egg *egg = new Egg();
-    egg->setPos(150,270);
-
-    scene->addItem(egg);
-    items.append(egg);
-    egg = new Egg();
-    egg->setPos(250,200);
-
-    scene->addItem(egg);
-    items.append(egg);
-    egg = new Egg();
-    egg->setPos(350,270);
-
-    scene->addItem(egg);
-    items.append(egg);
-
     Ground *base = new Ground();
 
     Trap *trap = new Trap();
-    trap->setPos(430, ui->graphicsView->height() - 2*base->boundingRect().height());
+    trap->setPos(650, ui->graphicsView->height() - 2*base->boundingRect().height());
     scene->addItem(trap);
 
     Ladder *ladder = new Ladder();
@@ -62,24 +46,61 @@ Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget)
 //fps timer
     timer = new QTimer();
     timer->setInterval(1000 / 100);
+//egg timer
+    eggTimer = new QTimer();
 
     connect(timer,&QTimer::timeout,player,&Player::slotTimer);
     connect(ui->quitButton, SIGNAL(clicked(bool)), qApp, SLOT(quit()));
     connect(player, &Player::signalItemCheck, this, &Widget::eggDelete);
+    connect(eggTimer, &QTimer::timeout, this, &Widget::createEgg);
+
+    connect(timer,&QTimer::timeout,trap,&Trap::gameOverTimer);
+    connect(trap, &Trap::gotOver, this, &Widget::gameOverMsg);
 
     count = 0;
 }
+
+void Widget::gameOverMsg(){
+    timer->stop();
+    eggTimer->stop();
+    QString endMsg = "Game over. \n Score: " + QString::number(ui->lcdNumber->value());
+    QMessageBox::warning(this, "Game Over", endMsg);
+
+
+    player->setPos(10, 250);
+
+    ui->graphicsView->setVisible(false);
+    ui->startButton->setVisible(true);
+    ui->scoreButton->setVisible(true);
+    ui->quitButton->setVisible(true);
+    ui->stopButton->setVisible(false);
+    ui->lcdNumber->setVisible(false);
+
+    foreach (QGraphicsItem *curr, items) {
+            scene->removeItem(curr);
+            items.removeOne(curr);
+            delete curr;
+        }
+     ui->lcdNumber->display(0);
+}
+
 void Widget::eggDelete(QGraphicsItem *item)
 {
     foreach (QGraphicsItem *curr, items) {
         if(curr == item){
             scene->removeItem(curr);
             items.removeOne(item);
-            delete curr;
             ui->lcdNumber->display(ui->lcdNumber->value()+1);
         }
     }
 }
+
+ void Widget::createEgg(){
+    Egg *temp = new Egg();
+    scene->addItem(temp);
+    temp->setPos(qrand()%600, qrand()%90 + 180);
+    items.append(temp);
+ }
 
 Widget::~Widget()
 {
@@ -97,6 +118,7 @@ void Widget::paintEvent(QPaintEvent *)
 void Widget::on_startButton_clicked()
 {
     timer->start();
+    eggTimer->start(1000);
     ui->graphicsView->setVisible(true);
     ui->startButton->setVisible(false);
     ui->quitButton->setVisible(false);
@@ -108,6 +130,7 @@ void Widget::on_startButton_clicked()
 void Widget::on_stopButton_clicked()
 {
     timer->stop();
+    eggTimer->stop();
     ui->graphicsView->setVisible(false);
     ui->startButton->setVisible(true);
     ui->scoreButton->setVisible(true);
