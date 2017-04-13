@@ -17,6 +17,11 @@ public:
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
+public slots:
+    void gameOverTimer();
+signals:
+    void gotOver();
+
 };
 
 #endif
