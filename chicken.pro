@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -29,7 +29,9 @@ SOURCES += main.cpp\
     egg.cpp \
     ground.cpp \
     trap.cpp \
-    ladder.cpp
+    ladder.cpp \
+    heart.cpp \
+    enemy.cpp
 
 HEADERS  += \
     widget.h \
@@ -37,7 +39,9 @@ HEADERS  += \
     egg.h \
     ground.h \
     trap.h \
-    ladder.h
+    ladder.h \
+    heart.h \
+    enemy.h
 
 FORMS    += \
     widget.ui
