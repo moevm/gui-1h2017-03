@@ -172,6 +172,24 @@
     <enum>QFrame::NoFrame</enum>
    </property>
   </widget>
+  <widget class="QPushButton" name="continueButton">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>150</y>
+     <width>180</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>15</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Continue</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

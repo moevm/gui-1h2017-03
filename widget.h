@@ -8,6 +8,10 @@
 #include <QTimer>
 #include <QLCDNumber>
 #include <QMessageBox>
+#include <QMediaPlayer>
+#include <QMediaPlaylist>
+
+#include <QDebug>
 
 #include <windows.h>
 
@@ -16,6 +20,8 @@
 #include "ground.h"
 #include "trap.h"
 #include "ladder.h"
+#include "heart.h"
+#include "enemy.h"
 
 namespace Ui {
 class Widget;
@@ -37,10 +43,16 @@ private:
     QTimer *eggTimer;
     Ui::Widget *ui;
 
+    void setGameProperties(void);
+    void gameOver();
     void paintEvent(QPaintEvent *);
 
     QList<QGraphicsItem *> items;  //list of usable items
+    QList<QGraphicsItem *> chickenlifes;  //list of hearts
     double count;   //score counter
+
+    QMediaPlayer *backgroundPlayer;
+    QMediaPlaylist *backgroundPlaylist;
 
 private slots:
 
@@ -53,6 +65,7 @@ private slots:
     void eggDelete(QGraphicsItem *item);
     void createEgg();
     void gameOverMsg();
+    void on_continueButton_clicked();
 };
 
 #endif // WIDGET_H
