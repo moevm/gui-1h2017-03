@@ -17,18 +17,3 @@ void Trap::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     Q_UNUSED(widget);
 }
 
-void Trap::gameOverTimer(){
-
-    QList<QGraphicsItem *> foundItems = scene()->items(QPolygonF()
-                                                               << mapToScene(5, 5)
-                                                               << mapToScene(5, 25)
-                                                               << mapToScene(25, 25));
-        foreach (QGraphicsItem *item, foundItems) {
-            if (item == this) continue;
-            emit gotOver();
-        }
-}
-
-void gotOver(){
-
-}
