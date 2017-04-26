@@ -16,7 +16,12 @@ QPushButton:pressed {
 QPushButton:hover {
     background-color: #e7e7e7;
 }
-
+QPushButton:!enabled {
+    background-color: #c7c7c7;
+}
+QPushButton:enabled {
+    background-color: #fff;
+}
 
 QWidget#Widget {
      background-image: url(:/pic/backgr.png);
@@ -26,4 +31,17 @@ QWidget#Widget {
 
 QGraphicsView {
     background-image: url(:/pic/gamebg.png);
+}
+
+QMessageBox {
+    background-color: #333333;
+}
+
+QMessageBox QLabel {
+    color: #aaa;
+    color: #fff;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    margin: 1px 2px;
 }
