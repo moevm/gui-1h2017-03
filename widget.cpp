@@ -24,13 +24,6 @@ void Widget::setGameProperties(void){
     Enemy *enemy2 = new Enemy(300, 270, 120, 2);
     scene->addItem(enemy2);
 
-    Ladder *ladder = new Ladder();
-    ladder->setPos(500, ui->graphicsView->height() - 2*base->boundingRect().height());
-    scene->addItem(ladder);
-    ladder = new Ladder();
-    ladder->setPos(500, ui->graphicsView->height() - 3*base->boundingRect().height());
-    scene->addItem(ladder);
-
     for(int i=0; i<(ui->graphicsView->width()/base->boundingRect().width()); i++){
         base = new Ground();
         base->setPos(i*base->boundingRect().width(), ui->graphicsView->height()-base->boundingRect().height());
@@ -43,7 +36,7 @@ void Widget::setGameProperties(void){
     //egg timer
         eggTimer = new QTimer();
         connect(timer,&QTimer::timeout,enemy,&Enemy::slotTimer);
-         connect(timer,&QTimer::timeout,enemy2,&Enemy::slotTimer);
+        connect(timer,&QTimer::timeout,enemy2,&Enemy::slotTimer);
         connect(timer,&QTimer::timeout,player,&Player::slotTimer);          //player movement
         connect(player, &Player::foundEgg, this, &Widget::eggDelete);       //egg picked
         connect(player, &Player::foundTrap, this, &Widget::gameOverMsg);    //chicken catched
@@ -62,6 +55,9 @@ Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget)
     ui->scoreBackButton->setVisible(false);
     ui->scoreLabel->setVisible(false);
     ui->lcdNumber->setVisible(false);
+    ui->gameOverWidget->setVisible(false);
+    ui->gameModeWidget->setVisible(false);
+    ui->scoreTable->setVisible(false);
     this->setFixedSize(912,400);
 
     ui->graphicsView->setScene(scene);
@@ -78,6 +74,11 @@ Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget)
     backgroundPlaylist->setPlaybackMode(QMediaPlaylist::Random);
     backgroundPlayer->setVolume(30);
 
+    QSqlDatabase db;
+    db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName(QApplication::applicationDirPath()+ "\\database\\score.db3");
+    db.open();
+//"C:\\Users\\user\\Documents\\chicken\\database\\score.db3"
 
     connect(ui->quitButton, SIGNAL(clicked(bool)), qApp, SLOT(quit())); //quit
     count = 0;
@@ -87,7 +88,7 @@ void Widget::gameOverMsg(){
     player->decLife();
     scene->removeItem(chickenlifes.takeLast());
 
-    if(player->getLifeCount()<1)gameOver();
+    if(player->getLifeCount()<1)    gameOver();
     else{
         QMediaPlayer * soundplayer = new QMediaPlayer(this);
         QMediaPlaylist * playlist = new QMediaPlaylist(soundplayer);
@@ -153,12 +154,16 @@ void Widget::paintEvent(QPaintEvent *)
 
 void Widget::on_startButton_clicked()
 {
+   // ui->gameModeWidget->setVisible(true);
+
+
     backgroundPlayer->play();
 
     setGameProperties();
 
     timer->start();
-    eggTimer->start(1000);
+    eggTimer->start(1500);
+
     ui->graphicsView->setVisible(true);
     ui->startButton->setVisible(false);
     ui->continueButton->setVisible(false);
@@ -193,6 +198,8 @@ void Widget::on_scoreBackButton_clicked()
     ui->quitButton->setVisible(true);
     ui->scoreButton->setVisible(true);
     ui->scoreBackButton->setVisible(false);
+    ui->scoreButton->setEnabled(true);
+    ui->scoreTable->setVisible(false);
 }
 
 void Widget::on_scoreButton_clicked()
@@ -203,7 +210,52 @@ void Widget::on_scoreButton_clicked()
     ui->quitButton->setVisible(false);
     ui->scoreLabel->setVisible(true);
     ui->scoreBackButton->setVisible(true);
+    ui->scoreButton->setEnabled(false);
+    ui->scoreTable->setVisible(true);
 
+    QSqlQuery query;
+    query.exec("SELECT Name, Score FROM Score ORDER BY Score DESC");
+
+    QStandardItemModel *model = new QStandardItemModel;
+    QStandardItem *item;
+    QStringList horizontalHeader;
+    horizontalHeader.append("Name");
+    horizontalHeader.append("Score");
+    model->setHorizontalHeaderLabels(horizontalHeader);
+    int i = 0;
+
+    QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel(this);
+    proxyModel->setSourceModel(model);
+  //  proxyModel->sort(1);
+    ui->scoreTable->setModel( proxyModel );
+
+    while (query.next()){
+        item = new QStandardItem(query.value(0).toString());
+        item->setTextAlignment(Qt::AlignCenter);
+        model->setItem(i, 0, item);
+        item = new QStandardItem(query.value(1).toString());
+        item->setTextAlignment(Qt::AlignCenter);
+        model->setItem(i, 1, item);
+        i++;
+    }
+
+    ui->scoreTable->setSortingEnabled(true);
+   // ui->scoreTable->sortByColumn(1,Qt::DescendingOrder);
+
+
+    ui->scoreTable->horizontalHeader()->setDefaultSectionSize(ui->scoreTable->width()/2-1);
+    ui->scoreTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    ui->scoreTable->horizontalHeader()->setSectionsClickable(false);
+
+    ui->scoreTable->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    ui->scoreTable->verticalHeader()->setSectionsClickable(false);
+    ui->scoreTable->verticalHeader()->setVisible(false);
+
+    ui->scoreTable->setShowGrid(false);
+    ui->scoreTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->scoreTable->setSelectionMode(QAbstractItemView::NoSelection);
+    ui->scoreTable->setFocusPolicy(Qt::NoFocus);
+    ui->scoreTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 void Widget::on_quitButton_clicked()
@@ -218,7 +270,11 @@ void Widget::gameOver(){
 
     soundplayer->setPlaylist(playlist);
 
-    int num = rand()%2+1;   //fail sound randomize
+    ui->gameOverWidget->setVisible(true);
+    QApplication::processEvents();
+    ui->overScoreLabel->setText("Your score is: " + QString::number(ui->lcdNumber->value()));
+
+    int num = rand()%2+1;   // sound randomize
     int radix = 10;
     char buff[3];
     QString fileName = "qrc:/sound/GameOver";
@@ -232,8 +288,6 @@ void Widget::gameOver(){
 
     timer->stop();
     eggTimer->stop();
-    QString endMsg = "Game over. \n Score: " + QString::number(ui->lcdNumber->value());
-    QMessageBox::about(this, "Game Over", endMsg);
 
     disconnect(timer,&QTimer::timeout,player,&Player::slotTimer);          //player movement
     disconnect(player, &Player::foundEgg, this, &Widget::eggDelete);       //egg picked
@@ -255,11 +309,11 @@ void Widget::gameOver(){
     ui->quitButton->setVisible(true);
     ui->stopButton->setVisible(false);
     ui->lcdNumber->setVisible(false);
-    ui->lcdNumber->display(0);
 }
 
 void Widget::on_continueButton_clicked()
 {
+    backgroundPlayer->play();
     timer->start();
     eggTimer->start(1000);
     ui->graphicsView->setVisible(true);
@@ -269,4 +323,30 @@ void Widget::on_continueButton_clicked()
     ui->stopButton->setVisible(true);
     ui->scoreButton->setVisible(false);
     ui->lcdNumber->setVisible(true);
+}
+
+void Widget::on_inputName_clicked()
+{
+
+    QSqlQuery query;
+    query.prepare("INSERT INTO Score (Name, Score) "
+          "VALUES (?, ?)");
+    query.addBindValue(ui->nameField->text()==""?"no name":ui->nameField->text());
+    query.addBindValue((int)(ui->lcdNumber->value()==0?0:ui->lcdNumber->value()));
+    query.exec();
+
+
+    ui->nameField->setText("");
+    ui->lcdNumber->display(0);
+    ui->gameOverWidget->setVisible(false);
+}
+
+void Widget::on_nameField_returnPressed()
+{
+    on_inputName_clicked();
+}
+
+void Widget::on_runnerModeButton_released()
+{
+    ui->gameModeWidget->setStyleSheet("background-image:url(:/pic/runnerModebg.png)");
 }
