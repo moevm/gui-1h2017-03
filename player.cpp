@@ -30,19 +30,20 @@
         Q_UNUSED(widget);
     }
 
-    void Player::movePlayer(){
+
+    void Player::movePlayer(int direction){
         movement = 0;
-        if(GetAsyncKeyState(VK_LEFT)||GetAsyncKeyState(0x41))
+        if(direction==-1)
         {
              this->moveBy(-speed,0);
              movement = -1;
-        } else if(GetAsyncKeyState(VK_RIGHT)||GetAsyncKeyState(0x44))
+        } else if(direction==1)
         {
              this->moveBy(speed,0);
              movement = 1;
         }
 
-        if(GetAsyncKeyState(VK_UP)||GetAsyncKeyState(0x57))
+        if(direction==2)
         {
             if(onGround)
             {
@@ -88,7 +89,7 @@
 
     void Player::slotTimer(){
 
-        this->movePlayer();
+        this->movePlayer(0);
 
         QList<QGraphicsItem *> foundItems = scene()->items(QPolygonF()
                                                                    << mapToScene(0, 0)

@@ -7,16 +7,15 @@
 #include <QGraphicsItem>
 #include <QPainter>
 
-#include <QDebug>
-
-#include "windows.h"
+#include <unistd.h>
+#include <termios.h>
 
 class Player: public QObject, public QGraphicsItem{
     Q_OBJECT
     Q_INTERFACES(QGraphicsItem)
 public:
     Player();
-    void movePlayer();
+    void movePlayer(int direction);
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -34,7 +33,7 @@ signals:
 private:
     int lifes;
     float gravity = 1.0;
-    float speed = 2.0;
+    float speed = 6.0;
     volatile short movement = 0; //-1 - left move, 0 - stand, 1 - right move
     bool onGround = false;
 };

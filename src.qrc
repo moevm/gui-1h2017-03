@@ -2,29 +2,30 @@
     <qresource prefix="/">
         <file>style/style.qss</file>
         <file>pic/backgr.png</file>
-         <file>pic/chicken_stand.png</file>
-         <file>pic/chicken_right.png</file>
-         <file>pic/chicken_left.png</file>
-         <file>pic/enemy1left.png</file>
-         <file>pic/enemy1right.png</file>
-         <file>pic/enemy2left.png</file>
-         <file>pic/enemy2right.png</file>
-         <file>pic/egg.png</file>
-         <file>pic/ground.png</file>
-         <file>pic/trap.png</file>
-         <file>pic/ladder.png</file>
-         <file>pic/gamebg.png</file>
-         <file>pic/heart.png</file>
-
-         <file>sound/Fail1.mp3</file>
-         <file>sound/Fail2.mp3</file>
-         <file>sound/Fail3.mp3</file>
-         <file>sound/Fail4.mp3</file>
-         <file>sound/Hit.mp3</file>
-         <file>sound/Backgrmusic1.mp3</file>
-         <file>sound/Backgrmusic2.mp3</file>
-         <file>sound/GameOver1.mp3</file>
-         <file>sound/GameOver2.mp3</file>
-
+        <file>pic/gameOverbg.png</file>
+        <file>pic/chicken_stand.png</file>
+        <file>pic/chicken_right.png</file>
+        <file>pic/chicken_left.png</file>
+        <file>pic/enemy1left.png</file>
+        <file>pic/enemy1right.png</file>
+        <file>pic/enemy2left.png</file>
+        <file>pic/enemy2right.png</file>
+        <file>pic/egg.png</file>
+        <file>pic/ground.png</file>
+        <file>pic/trap.png</file>
+        <file>pic/ladder.png</file>
+        <file>pic/gamebg.png</file>
+        <file>pic/heart.png</file>
+        <file>pic/runnerModebg.png</file>
+        <file>sound/Fail1.mp3</file>
+        <file>sound/Fail2.mp3</file>
+        <file>sound/Fail3.mp3</file>
+        <file>sound/Fail4.mp3</file>
+        <file>sound/Hit.mp3</file>
+        <file>sound/Backgrmusic1.mp3</file>
+        <file>sound/Backgrmusic2.mp3</file>
+        <file>sound/GameOver1.mp3</file>
+        <file>sound/GameOver2.mp3</file>
+        <file>database/score.db3</file>
     </qresource>
 </RCC>

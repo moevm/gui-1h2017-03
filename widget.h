@@ -10,10 +10,14 @@
 #include <QMessageBox>
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
+#include <QtSql/QSqlDatabase>
+#include <QSqlQuery>
+#include <QStandardItemModel>
+#include <QStandardItem>
+#include <QSortFilterProxyModel>
+#include <QKeyEvent>
 
 #include <QDebug>
-
-#include <windows.h>
 
 #include "player.h"
 #include "egg.h"
@@ -41,6 +45,7 @@ private:
     QGraphicsScene *scene;
     QTimer *timer;
     QTimer *eggTimer;
+    QTimer *enemySpawnTimer;
     Ui::Widget *ui;
 
     void setGameProperties(void);
@@ -54,6 +59,7 @@ private:
     QMediaPlayer *backgroundPlayer;
     QMediaPlaylist *backgroundPlaylist;
 
+
 private slots:
 
     void on_startButton_clicked();
@@ -64,8 +70,15 @@ private slots:
 
     void eggDelete(QGraphicsItem *item);
     void createEgg();
-    void gameOverMsg();
+    void spawnEnemy();
+    void gameOverMsg(QGraphicsItem *item);
     void on_continueButton_clicked();
+    void on_inputName_clicked();
+    void on_nameField_returnPressed();
+    void on_runnerModeButton_released();
+protected:
+    void keyPressEvent(QKeyEvent *event);
+    void keyReleaseEvent(QKeyEvent *event);
 };
 
 #endif // WIDGET_H

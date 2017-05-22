@@ -7,7 +7,7 @@ Ladder::Ladder()
 
 QRectF Ladder::boundingRect() const
 {
-    return QRectF(0, 0, 25, 25);
+    return QRectF(0, 0, 26, 26);
 }
 
 void Ladder::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget){
