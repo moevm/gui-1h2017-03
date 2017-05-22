@@ -20,12 +20,15 @@ public:
 
 public slots:
     void slotTimer();
+    void difficultyTimer();
 
 private:
     int baseX, baseY, patrolRange;
     QImage *img, *img2;
 
+
     float speed = 0.8;
+    float maxSpeed = 2.0;
     volatile short movement = 0; //-1 - left move, 0 - stand, 1 - right move
 };
 

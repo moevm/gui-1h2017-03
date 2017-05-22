@@ -55,11 +55,20 @@ if(this->x() < baseX - patrolRange)
     movement = 1;
     this->setX(baseX - patrolRange);
 }
+if(this->x() < 70){
+    movement = 1;
+    this->setX(70);
+}
 //right interc check
 if(this->x() > baseX + patrolRange)
 {
     movement = -1;
     this->setX(baseX + patrolRange);
+}
+if(this->x() + /*this->rect().width()*/50 + 20 >830)
+{
+    movement = -1;
+    this->setX(831 - /*this->rect().width()*/50 - 20);
 }
 }
 
@@ -67,5 +76,12 @@ void Enemy::slotTimer(){
 
 this->moveEnemy();
 
+}
+
+void Enemy::difficultyTimer(){
+    if(this->speed > maxSpeed)this->speed = maxSpeed;
+    else this->speed+=0.07;
+
+    this->patrolRange+=20;
 }
 

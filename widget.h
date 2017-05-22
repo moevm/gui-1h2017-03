@@ -10,6 +10,11 @@
 #include <QMessageBox>
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
+#include "QtSql/QSqlDatabase"
+#include "QSqlQuery"
+#include "QStandardItemModel"
+#include "QStandardItem"
+#include "QSortFilterProxyModel"
 
 #include <QDebug>
 
@@ -41,6 +46,7 @@ private:
     QGraphicsScene *scene;
     QTimer *timer;
     QTimer *eggTimer;
+    QTimer *enemySpawnTimer;
     Ui::Widget *ui;
 
     void setGameProperties(void);
@@ -54,6 +60,7 @@ private:
     QMediaPlayer *backgroundPlayer;
     QMediaPlaylist *backgroundPlaylist;
 
+
 private slots:
 
     void on_startButton_clicked();
@@ -64,8 +71,12 @@ private slots:
 
     void eggDelete(QGraphicsItem *item);
     void createEgg();
-    void gameOverMsg();
+    void spawnEnemy();
+    void gameOverMsg(QGraphicsItem *item);
     void on_continueButton_clicked();
+    void on_inputName_clicked();
+    void on_nameField_returnPressed();
+    void on_runnerModeButton_released();
 };
 
 #endif // WIDGET_H

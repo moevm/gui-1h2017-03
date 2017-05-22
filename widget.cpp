@@ -13,16 +13,17 @@ void Widget::setGameProperties(void){
         chickenlifes.append(heart);
     }
     Ground *base = new Ground();
-
+    int trapAmount = 2;
     Trap *trap = new Trap();
-    trap->setPos(650, ui->graphicsView->height() - 2*base->boundingRect().height());
-    scene->addItem(trap);
+    for(int i = 0;i < trapAmount; i++){
+        trap = new Trap();
+        trap->setPos(100+qrand()%700, ui->graphicsView->height() - 2*base->boundingRect().height());
+        scene->addItem(trap);
+ }
 
-    Enemy *enemy = new Enemy(600, 270, 80, 1);
+    Enemy *enemy = new Enemy(300+qrand()%450, 270, 60, qrand()%2);
     scene->addItem(enemy);
-
-    Enemy *enemy2 = new Enemy(300, 270, 120, 2);
-    scene->addItem(enemy2);
+    items.append(enemy);
 
     for(int i=0; i<(ui->graphicsView->width()/base->boundingRect().width()); i++){
         base = new Ground();
@@ -35,12 +36,17 @@ void Widget::setGameProperties(void){
         timer->setInterval(1000 / 100);
     //egg timer
         eggTimer = new QTimer();
+    //enemy spawn
+        enemySpawnTimer = new QTimer();
+       // enemySpawnTimer->setInterval(10000);
+
         connect(timer,&QTimer::timeout,enemy,&Enemy::slotTimer);
-        connect(timer,&QTimer::timeout,enemy2,&Enemy::slotTimer);
+        connect(eggTimer, &QTimer::timeout, enemy, &Enemy::difficultyTimer);
         connect(timer,&QTimer::timeout,player,&Player::slotTimer);          //player movement
         connect(player, &Player::foundEgg, this, &Widget::eggDelete);       //egg picked
         connect(player, &Player::foundTrap, this, &Widget::gameOverMsg);    //chicken catched
-        connect(eggTimer, &QTimer::timeout, this, &Widget::createEgg);      //egg creation(test)
+        connect(eggTimer, &QTimer::timeout, this, &Widget::createEgg);      //egg creation
+        connect(enemySpawnTimer, &QTimer::timeout, this, &Widget::spawnEnemy);      //egg creation
 }
 Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget)
 {
@@ -78,18 +84,22 @@ Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget)
     db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName(QApplication::applicationDirPath()+ "\\database\\score.db3");
     db.open();
-//"C:\\Users\\user\\Documents\\chicken\\database\\score.db3"
-
     connect(ui->quitButton, SIGNAL(clicked(bool)), qApp, SLOT(quit())); //quit
     count = 0;
 }
 
-void Widget::gameOverMsg(){
+void Widget::gameOverMsg(QGraphicsItem *item){
     player->decLife();
     scene->removeItem(chickenlifes.takeLast());
 
-    if(player->getLifeCount()<1)    gameOver();
+    if(player->getLifeCount()<1) gameOver();
     else{
+        foreach (QGraphicsItem *curr, items) {
+            if(curr == item){
+                scene->removeItem(curr);
+               // items.removeOne(item);
+            }
+        }
         QMediaPlayer * soundplayer = new QMediaPlayer(this);
         QMediaPlaylist * playlist = new QMediaPlaylist(soundplayer);
 
@@ -135,8 +145,16 @@ void Widget::eggDelete(QGraphicsItem *item)
  void Widget::createEgg(){
     Egg *temp = new Egg();
     scene->addItem(temp);
-    temp->setPos(qrand()%500, qrand()%90 + 180);
+    temp->setPos(qrand()%800, qrand()%140 + 130);
     items.append(temp);
+ }
+
+ void Widget::spawnEnemy(){
+     Enemy *enemy = new Enemy(300+qrand()%450, 270, 60, qrand()%2);
+     scene->addItem(enemy);
+     items.append(enemy);
+     connect(timer,&QTimer::timeout,enemy,&Enemy::slotTimer);
+     connect(eggTimer, &QTimer::timeout, enemy, &Enemy::difficultyTimer);
  }
 
 Widget::~Widget()
@@ -154,15 +172,12 @@ void Widget::paintEvent(QPaintEvent *)
 
 void Widget::on_startButton_clicked()
 {
-   // ui->gameModeWidget->setVisible(true);
-
-
     backgroundPlayer->play();
-
     setGameProperties();
 
     timer->start();
     eggTimer->start(1500);
+    enemySpawnTimer->start(10000);
 
     ui->graphicsView->setVisible(true);
     ui->startButton->setVisible(false);
@@ -179,6 +194,7 @@ void Widget::on_stopButton_clicked()
     backgroundPlayer->pause();
     timer->stop();
     eggTimer->stop();
+    enemySpawnTimer->stop();
     ui->graphicsView->setVisible(false);
     ui->startButton->setVisible(true);
     ui->startButton->setEnabled(false);
@@ -214,7 +230,7 @@ void Widget::on_scoreButton_clicked()
     ui->scoreTable->setVisible(true);
 
     QSqlQuery query;
-    query.exec("SELECT Name, Score FROM Score ORDER BY Score DESC");
+    query.exec("SELECT Name, Score FROM ScoreTable ORDER BY Score DESC");
 
     QStandardItemModel *model = new QStandardItemModel;
     QStandardItem *item;
@@ -226,21 +242,23 @@ void Widget::on_scoreButton_clicked()
 
     QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel(this);
     proxyModel->setSourceModel(model);
-  //  proxyModel->sort(1);
+    proxyModel->sort(1);
     ui->scoreTable->setModel( proxyModel );
 
     while (query.next()){
-        item = new QStandardItem(query.value(0).toString());
+        item = new QStandardItem();
+        item->setData(QVariant(query.value(0).toString()),Qt::DisplayRole);
         item->setTextAlignment(Qt::AlignCenter);
         model->setItem(i, 0, item);
-        item = new QStandardItem(query.value(1).toString());
+        item = new QStandardItem();
+        item->setData(QVariant(query.value(1).toInt()),Qt::DisplayRole);
         item->setTextAlignment(Qt::AlignCenter);
         model->setItem(i, 1, item);
         i++;
     }
 
     ui->scoreTable->setSortingEnabled(true);
-   // ui->scoreTable->sortByColumn(1,Qt::DescendingOrder);
+    ui->scoreTable->sortByColumn(1,Qt::DescendingOrder);
 
 
     ui->scoreTable->horizontalHeader()->setDefaultSectionSize(ui->scoreTable->width()/2-1);
@@ -300,15 +318,8 @@ void Widget::gameOver(){
         deleteList.removeFirst();
     }
 
-    ui->graphicsView->setVisible(false);
-    ui->startButton->setVisible(true);
-    ui->startButton->setEnabled(true);
-    ui->scoreButton->setVisible(true);
-    ui->continueButton->setVisible(true);
-    ui->continueButton->setEnabled(false);
-    ui->quitButton->setVisible(true);
     ui->stopButton->setVisible(false);
-    ui->lcdNumber->setVisible(false);
+    ui->graphicsView->setVisible(false);
 }
 
 void Widget::on_continueButton_clicked()
@@ -329,16 +340,23 @@ void Widget::on_inputName_clicked()
 {
 
     QSqlQuery query;
-    query.prepare("INSERT INTO Score (Name, Score) "
+    query.prepare("INSERT INTO ScoreTable (Name, Score) "
           "VALUES (?, ?)");
     query.addBindValue(ui->nameField->text()==""?"no name":ui->nameField->text());
-    query.addBindValue((int)(ui->lcdNumber->value()==0?0:ui->lcdNumber->value()));
+    query.addBindValue(ui->lcdNumber->value()==0?0:ui->lcdNumber->value());
     query.exec();
 
 
     ui->nameField->setText("");
     ui->lcdNumber->display(0);
     ui->gameOverWidget->setVisible(false);
+    ui->startButton->setVisible(true);
+    ui->startButton->setEnabled(true);
+    ui->scoreButton->setVisible(true);
+    ui->continueButton->setVisible(true);
+    ui->continueButton->setEnabled(false);
+    ui->quitButton->setVisible(true);
+    ui->lcdNumber->setVisible(false);
 }
 
 void Widget::on_nameField_returnPressed()
@@ -348,5 +366,5 @@ void Widget::on_nameField_returnPressed()
 
 void Widget::on_runnerModeButton_released()
 {
-    ui->gameModeWidget->setStyleSheet("background-image:url(:/pic/runnerModebg.png)");
+
 }
